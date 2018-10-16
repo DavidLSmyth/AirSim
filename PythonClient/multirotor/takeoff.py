@@ -7,10 +7,6 @@ client.enableApiControl(True)
 
 client.armDisarm(True)
 
-landed = client.getMultirotorState().landed_state
-if landed == airsim.LandedState.Landed:
-    print("taking off...")
-    client.takeoffAsync().join()
-else:
-    print("already flying...")
-    client.hoverAsync().join()
+client.showPlannedWaypoints(10, 20, 200, 10, 20, 500, thickness=50, lifetime=10, debug_line_color='red')
+client.armDisarm(False)
+client.enableApiControl(False)
