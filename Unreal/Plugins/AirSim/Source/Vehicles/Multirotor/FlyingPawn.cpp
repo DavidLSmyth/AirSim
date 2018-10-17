@@ -3,6 +3,7 @@
 #include "AirBlueprintLib.h"
 #include "common/CommonStructs.hpp"
 #include "common/Common.hpp"
+#include "DrawDebugHelpers.h"
 
 AFlyingPawn::AFlyingPawn()
 {
@@ -16,6 +17,7 @@ void AFlyingPawn::BeginPlay()
     for (auto i = 0; i < rotor_count; ++i) {
         rotating_movements_[i] = UAirBlueprintLib::GetActorComponent<URotatingMovementComponent>(this, TEXT("Rotation") + FString::FromInt(i));
     }
+	PrevLocation = this->GetActorLocation();
 }
 
 void AFlyingPawn::initializeForBeginPlay()
@@ -37,6 +39,10 @@ void AFlyingPawn::Tick(float DeltaSeconds)
 {
     Super::Tick(DeltaSeconds);
     pawn_events_.getPawnTickSignal().emit(DeltaSeconds);
+	if (PrevLocation != this->GetActorLocation()) {
+		DrawDebugLine(this->GetWorld(), PrevLocation, this->GetActorLocation(), FColor::Red, false, LifeTime, uint8(0), 25);
+		PrevLocation = this->GetActorLocation();
+	}
 }
 
 

@@ -19,6 +19,12 @@ public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Debugging")
     float RotatorFactor = 1.0f;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Debugging")
+		bool TracePath = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Debugging")
+		float LifeTime = 60.0;
+
     AFlyingPawn();
     virtual void BeginPlay() override;
     virtual void Tick(float DeltaSeconds) override;
@@ -49,4 +55,6 @@ private: //variables
     UPROPERTY() URotatingMovementComponent* rotating_movements_[rotor_count];
 
     MultirotorPawnEvents pawn_events_;
+	FVector PrevLocation;
+	
 };

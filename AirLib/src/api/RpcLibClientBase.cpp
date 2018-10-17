@@ -212,6 +212,16 @@ void RpcLibClientBase::simPrintLogMessage(const std::string& message, std::strin
     pimpl_->client.call("simPrintLogMessage", message, message_param, severity);
 }
 
+void RpcLibClientBase::simShowDebugLines(double x1, double y1, double z1, double x2, double y2, double z2, double thickness, double lifetime, const std::string& debug_line_color)
+{
+	pimpl_->client.call("simShowDebugLines", x1, y1, z1, x2, y2, z2, thickness, lifetime, debug_line_color);
+}
+
+void RpcLibClientBase::showPlannedWaypoints(double x1, double y1, double z1, double x2, double y2, double z2, double thickness, double lifetime, const std::string & debug_line_color, const std::string& vehicle_name)
+{
+	pimpl_->client.call("simShowPlannedWaypoints", x1, y1, z1, x2, y2, z2, thickness, lifetime, debug_line_color, vehicle_name);
+}
+
 bool RpcLibClientBase::simIsPaused() const
 {
     return pimpl_->client.call("simIsPaused").as<bool>();

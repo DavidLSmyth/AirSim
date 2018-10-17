@@ -25,6 +25,8 @@ public:
     virtual void printLogMessage(const std::string& message,
         const std::string& message_param = "", unsigned char severity = 0) override;
 
+	virtual void showDebugLine(double x1, double y1, double z1, double x2, double y2, double z2, double thickness, double lifetime, const std::string debug_line_color) override;
+
     virtual Pose getObjectPose(const std::string& object_name) const override;
     virtual bool setObjectPose(const std::string& object_name, const Pose& pose, bool teleport) override;
 

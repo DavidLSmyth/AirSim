@@ -372,6 +372,13 @@ void PawnSimApi::plot(std::istream& s, FColor color, const Vector3r& offset)
 
 }
 
+void PawnSimApi::showPlannedWaypoints(double x1, double y1, double z1, double x2, double y2, double z2, double thickness, double lifetime, const std::string debug_line_color) {
+	AActor* pawn = getPawn();
+	FVector p1 = ned_transform_.fromLocalNed(Vector3r(x1, y1, z1));
+	FVector p2 = ned_transform_.fromLocalNed(Vector3r(x2, y2, z2));
+	UAirBlueprintLib::showDebugLine(pawn->GetWorld(), p1.X, p1.Y, p1.Z, p2.X, p2.Y, p2.Z, thickness, lifetime, debug_line_color);
+}
+
 msr::airlib::CameraInfo PawnSimApi::getCameraInfo(const std::string& camera_name) const
 {
     msr::airlib::CameraInfo camera_info;

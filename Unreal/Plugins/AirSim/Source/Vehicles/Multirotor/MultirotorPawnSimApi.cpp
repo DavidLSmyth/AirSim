@@ -51,6 +51,7 @@ void MultirotorPawnSimApi::pawnTick(float dt)
     //calls to update* are handled by physics engine and in SimModeWorldBase
 }
 
+
 void MultirotorPawnSimApi::updateRenderedState(float dt)
 {
     //Utils::log("------Render tick-------");

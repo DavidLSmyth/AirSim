@@ -132,6 +132,20 @@ RpcLibServerBase::RpcLibServerBase(ApiProvider* api_provider, const std::string&
         getWorldSimApi()->printLogMessage(message, message_param, severity);
     });
 
+	pimpl_->server.bind("simShowDebugLines", [&](double x1, double y1, double z1, double x2, double y2, double z2, double thickness, double lifetime, const std::string debug_line_color) -> void {
+		//vector<Vector3r> conv_path;
+		//RpcLibAdapatorsBase::to(path, conv_path);
+		getWorldSimApi()->showDebugLine(x1, y1, z1, x2, y2, z2, thickness, lifetime, debug_line_color);
+	});
+
+	pimpl_->server.bind("simShowPlannedWaypoints", [&](double x1, double y1, double z1, double x2, double y2, double z2, double thickness, double lifetime, const std::string debug_line_color, const std::string& vehicle_name) -> void {
+		//vector<Vector3r> conv_path;
+		//RpcLibAdapatorsBase::to(path, conv_path);
+		//getWorldSimApi()->showDebugLine(x1, y1, z1, x2, y2, z2, thickness, lifetime, debug_line_color);
+		getVehicleSimApi(vehicle_name)->showPlannedWaypoints(x1, y1, z1, x2, y2, z2, thickness, lifetime, debug_line_color);
+	});
+
+
     pimpl_->server.bind("getHomeGeoPoint", [&](const std::string& vehicle_name) -> RpcLibAdapatorsBase::GeoPoint {
         const auto& geo_point = getVehicleApi(vehicle_name)->getHomeGeoPoint();
         return RpcLibAdapatorsBase::GeoPoint(geo_point);

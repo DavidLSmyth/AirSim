@@ -53,6 +53,9 @@ public:
 
     virtual Pose getPose() const = 0;
     virtual void setPose(const Pose& pose, bool ignore_collision) = 0;
+	//virtual void showDebugLine(double x1, double y1, double z1, double x2, double y2, double z2, double thickness, double lifetime, const std::string debug_line_color) = 0;
+	virtual void showPlannedWaypoints(double x1, double y1, double z1, double x2, double y2, double z2, double thickness, double lifetime, const std::string debug_line_color) = 0;
+
     virtual const Kinematics::State* getGroundTruthKinematics() const = 0;
     virtual const msr::airlib::Environment* getGroundTruthEnvironment() const = 0;
 

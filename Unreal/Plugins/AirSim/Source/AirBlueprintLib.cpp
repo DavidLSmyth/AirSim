@@ -11,6 +11,7 @@
 #include "Runtime/Engine/Classes/Engine/StaticMesh.h"
 #include "UObjectIterator.h"
 #include "Camera/CameraComponent.h"
+#include "DrawDebugHelpers.h"
 //#include "Runtime/Foliage/Public/FoliageType.h"
 #include "MessageDialog.h"
 #include "Engine/LocalPlayer.h"
@@ -192,6 +193,59 @@ void UAirBlueprintLib::LogMessage(const FString &prefix, const FString &suffix, 
     }
     //GEngine->AddOnScreenDebugMessage(key + 10, 60.0f, color, FString::FromInt(key));
 }
+
+void UAirBlueprintLib::showDebugLine(UWorld* WorldContext, double x1, double y1, double z1, double x2, double y2, double z2, double thickness, double lifetime, const std::string debug_line_color)
+{
+	/*
+	std::vector<float> x_vals_vec;
+	std::vector<float> y_vals_vec;
+	std::vector<float> z_vals_vec;
+	
+	std::istringstream x_stream(x_vals);
+	std::istringstream y_stream(y_vals);
+	std::istringstream z_stream(z_vals);
+
+	std::string x_string;
+	std::string y_string;
+	std::string z_string;
+
+	while (std::getline(x_stream, x_string, ',') && std::getline(y_stream, y_string, ',') && std::getline(z_stream, z_string, ',')) {
+		LogMessageString("x_string value: ", x_string, LogDebugLevel::Informational, 120);
+		LogMessageString("y_string value: ", y_string, LogDebugLevel::Informational, 120);
+		LogMessageString("z_string value: ", z_string, LogDebugLevel::Informational, 120);
+		x_vals_vec.push_back(std::stof(x_string));
+		y_vals_vec.push_back(std::stof(y_string));
+		z_vals_vec.push_back(std::stof(z_string));
+	}
+
+	if (WorldContext) {
+		int counter = 0;
+		for (counter; counter < x_vals_vec.size(); counter++) {
+			//need to handle errors
+			LogMessageString("Drawing debug line from " + std::to_string(x_vals_vec.at(counter)) + ", " + std::to_string(y_vals.at(counter)) + ", " + std::to_string(z_vals.at(counter)) + " to " +
+				std::to_string(x_vals_vec.at(counter + 1)) + ", " + std::to_string(y_vals_vec.at(counter + 1)) + ", " + std::to_string(z_vals_vec.at(counter + 1)), "", LogDebugLevel::Informational, 60);
+			DrawDebugLine(WorldContext, FVector(x_vals_vec.at(counter), y_vals_vec.at(counter), z_vals_vec.at(counter)), FVector(x_vals.at(counter + 1), y_vals.at(counter + 1), z_vals.at(counter + 1)), FColor::Red, false, lifetime, (uint8)'\000', thickness);
+		}
+	}
+	else {
+		LogMessageString("Couldnt get world context", "", LogDebugLevel::Informational, 50);
+	}
+	*/
+	if (WorldContext) {
+		//need to handle errors
+		LogMessageString("Drawing debug line from " + std::to_string(x1) + ", " + std::to_string(y1) + ", " + std::to_string(z1) + " to " +
+			std::to_string(x2) + ", " + std::to_string(y2) + ", " + std::to_string(z2), "", LogDebugLevel::Informational, 60);
+		DrawDebugLine(WorldContext, FVector(x1, y1, z1), FVector(x2, y2, z2), FColor::Red, false, lifetime, (uint8)'\000', thickness);
+		
+	}
+	else {
+		LogMessageString("Couldnt get world context", "", LogDebugLevel::Informational, 50);
+	}
+	
+}
+
+
+
 
 void UAirBlueprintLib::setUnrealClockSpeed(const AActor* context, float clock_speed)
 {

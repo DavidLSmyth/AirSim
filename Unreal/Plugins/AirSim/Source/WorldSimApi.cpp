@@ -57,6 +57,10 @@ void WorldSimApi::printLogMessage(const std::string& message,
     UAirBlueprintLib::LogMessageString(message, message_param, static_cast<LogDebugLevel>(severity));
 }
 
+void WorldSimApi::showDebugLine(double x1, double y1, double z1, double x2, double y2, double z2, double thickness, double lifetime, const std::string debug_line_color) {
+	UAirBlueprintLib::showDebugLine(simmode_->GetWorld(), x1, y1, z1, x2, y2, z2, thickness, lifetime, debug_line_color);
+}
+
 WorldSimApi::Pose WorldSimApi::getObjectPose(const std::string& object_name) const
 {
     Pose result;

@@ -45,6 +45,7 @@ public:
     static void LogMessageString(const std::string &prefix, const std::string &suffix, LogDebugLevel level, float persist_sec = 60);
     UFUNCTION(BlueprintCallable, Category = "Utils")
         static void LogMessage(const FString &prefix, const FString &suffix, LogDebugLevel level, float persist_sec = 60);
+	static void showDebugLine(UWorld * WorldContext, double x1, double y1, double z1, double x2, double y2, double z2, double thickness, double lifetime, const std::string debug_line_color);
     static float GetWorldToMetersScale(const AActor* context);
 
     template<typename T>

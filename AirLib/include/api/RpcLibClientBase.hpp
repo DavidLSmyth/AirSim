@@ -47,6 +47,8 @@ public:
     int simGetSegmentationObjectID(const std::string& mesh_name) const;
     void simPrintLogMessage(const std::string& message, std::string message_param = "", unsigned char severity = 0);
 
+	void simShowDebugLines(double x1, double y1, double z1, double x2, double y2, double z2, double thickness, double lifetime, const std::string& debug_line_color);
+	void showPlannedWaypoints(double x1, double y1, double z1, double x2, double y2, double z2, double thickness, double lifetime, const std::string& debug_line_color, const std::string& vehicle_name = "");
 
     bool armDisarm(bool arm, const std::string& vehicle_name = "");
     bool isApiControlEnabled(const std::string& vehicle_name = "") const;

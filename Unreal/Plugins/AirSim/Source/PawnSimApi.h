@@ -74,7 +74,9 @@ public: //implementation of VehicleSimApiBase
     virtual std::vector<uint8_t> getImage(const std::string& camera_name, ImageCaptureBase::ImageType image_type) const override;
     virtual Pose getPose() const override;
     virtual void setPose(const Pose& pose, bool ignore_collision) override;
-    virtual msr::airlib::CameraInfo getCameraInfo(const std::string& camera_name) const override;
+	virtual void showPlannedWaypoints(double x1, double y1, double z1, double x2, double y2, double z2, double thickness, double lifetime, const std::string debug_line_color);
+    
+	virtual msr::airlib::CameraInfo getCameraInfo(const std::string& camera_name) const override;
     virtual void setCameraOrientation(const std::string& camera_name, const Quaternionr& orientation) override;
     virtual CollisionInfo getCollisionInfo() const override;
     virtual int getRemoteControlID() const override;
