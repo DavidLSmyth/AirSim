@@ -167,6 +167,12 @@ protected:
         return firmware_->offboardApi().getLandedState() ? LandedState::Landed : LandedState::Flying;
     }
 
+	/*
+	virtual BatteryState getBatteryState() const override {
+		return firmware_->offboardApi().getBatteryState();
+	}
+	*/
+
     virtual RCData getRCData() const override
     {
         //return what we received last time through setRCData

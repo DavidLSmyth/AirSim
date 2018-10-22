@@ -116,7 +116,10 @@ class VehicleClient:
         
     def showPlannedWaypoints(self, x1, y1, z1, x2, y2, z2, thickness=50, lifetime=10, debug_line_color='red', vehicle_name = ''):
         self.client.call('simShowPlannedWaypoints', x1, y1, z1, x2, y2, z2, thickness, lifetime, debug_line_color, vehicle_name)
-
+        
+    def simShowDebugLines(self, x1, y1, z1, x2, y2, z2, thickness=50, lifetime=10, debug_line_color='red'):
+        self.client.call('simShowDebugLines', x1, y1, z1, x2, y2, z2, thickness, lifetime, debug_line_color)
+        
     def simGetCameraInfo(self, camera_name, vehicle_name = ''):
         # TODO: below str() conversion is only needed for legacy reason and should be removed in future
         return CameraInfo.from_msgpack(self.client.call('simGetCameraInfo', str(camera_name), vehicle_name))

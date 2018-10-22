@@ -179,8 +179,6 @@ bool MultirotorApiBase::moveOnPath(const vector<Vector3r>& path, float velocity,
         path_length += path_seg.seg_length;
         path_segs.push_back(path_seg);
         path3d.push_back(point);
-		//this->
-		//DrawDebugLine(WorldContext, FVector(x1, y1, z1), FVector(x2, y2, z2), FColor::Red, false, lifetime, (uint8)'\000', thickness);
     }
     //add last segment as zero length segment so we have equal number of segments and points. 
     //path_segs[i] refers to segment that starts at point i

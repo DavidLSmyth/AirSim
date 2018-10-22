@@ -1,6 +1,7 @@
 from __future__ import print_function
 import msgpackrpc #install as admin: pip install msgpack-rpc-python
 import numpy as np #pip install numpy
+import time
 
 class MsgpackMixin:
     def __repr__(self):
@@ -307,6 +308,26 @@ class KinematicsState(MsgpackMixin):
     linear_acceleration = Vector3r()
     angular_acceleration = Vector3r()
 
+class BatteryState(MsgpackMixin):
+    def __init__(self):
+        self.cap_remaining = 1
+        self.start_time = time.time()
+        self.start_time_stamp = 0
+        self.old_time_stamp = time.time()
+    def update_battery_cap(self, speed: 'm/s'):
+        now = time.time() 
+        delta = (now - self.old_time_stamp)* 1000
+        print('delta: ',delta)
+        self.old_time_stamp = now
+        
+        if self.cap_remaining == 0:
+            return
+        else:
+            self.cap_remaining = -4.971e-03 + (1.485e-08)*delta -(3.427e-03)*speed + self.cap_remaining+(5.517e-05) * speed * self.cap_remaining + (-5.181e-10) * delta* self.cap_remaining
+        print('capacity remaining: ', self.cap_remaining)
+        
+
+
 class EnvironmentState(MsgpackMixin):
     position = Vector3r()
     geo_point = GeoPoint()
@@ -332,6 +353,7 @@ class MultirotorState(MsgpackMixin):
     timestamp = np.uint64(0)
     landed_state = LandedState.Landed
     rc_data = RCData()
+    battery_cap = BatteryState
 
 class ProjectionMatrix(MsgpackMixin):
     matrix = []

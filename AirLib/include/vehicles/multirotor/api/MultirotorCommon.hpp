@@ -43,6 +43,10 @@ struct YawMode {
     }
 };
 
+struct BatteryState {
+
+};
+
 //properties of vehicle
 struct MultirotorApiParams {
     MultirotorApiParams() {};
@@ -74,15 +78,16 @@ struct MultirotorState {
     uint64_t timestamp;
     LandedState landed_state;
     RCData rc_data;
+	//BatteryState battery_state;
 
     MultirotorState()
     {}
-    MultirotorState(const CollisionInfo& collision_val, const Kinematics::State& kinematics_estimated_val, 
-        const GeoPoint& gps_location_val, uint64_t timestamp_val,
-        LandedState landed_state_val, const RCData& rc_data_val)
-        : collision(collision_val), kinematics_estimated(kinematics_estimated_val),
-        gps_location(gps_location_val), timestamp(timestamp_val),
-        landed_state(landed_state_val), rc_data(rc_data_val)
+	MultirotorState(const CollisionInfo& collision_val, const Kinematics::State& kinematics_estimated_val,
+		const GeoPoint& gps_location_val, uint64_t timestamp_val,
+		LandedState landed_state_val, const RCData& rc_data_val)
+		: collision(collision_val), kinematics_estimated(kinematics_estimated_val),
+		gps_location(gps_location_val), timestamp(timestamp_val),
+		landed_state(landed_state_val), rc_data(rc_data_val)
     {
     }
 

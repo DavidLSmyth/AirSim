@@ -48,6 +48,7 @@ public:
         LandedState landed_state;
         RCData rc_data;
         std::vector<std::string> controller_messages;
+		//BatteryState battery_state
 
 
         MSGPACK_DEFINE_MAP(collision, kinematics_estimated, gps_location, timestamp, landed_state, rc_data);
@@ -63,6 +64,7 @@ public:
             timestamp = s.timestamp;
             landed_state = s.landed_state;
             rc_data = RCData(s.rc_data);
+			//battery_state = battery_state;
         }
 
         msr::airlib::MultirotorState to() const
