@@ -4,7 +4,6 @@
 //in header only mode, control library is not available
 #ifndef AIRLIB_HEADER_ONLY
 
-#include "DrawDebugHelpers.h"
 #include "vehicles/multirotor/api/MultirotorApiBase.hpp"
 #include <functional>
 #include <exception>
