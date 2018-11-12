@@ -18,7 +18,7 @@
 #include "api/VehicleApiBase.hpp"
 #include "api/VehicleSimApiBase.hpp"
 #include "common/common_utils/UniqueValueMap.hpp"
-
+#include "SimRadDetector.h"
 
 #include "PawnEvents.h"
 
@@ -75,11 +75,14 @@ public: //implementation of VehicleSimApiBase
     virtual Pose getPose() const override;
     virtual void setPose(const Pose& pose, bool ignore_collision) override;
 	virtual void showPlannedWaypoints(double x1, double y1, double z1, double x2, double y2, double z2, double thickness, double lifetime, const std::string debug_line_color);
+
+	float getRadSensorData();
     
 	virtual msr::airlib::CameraInfo getCameraInfo(const std::string& camera_name) const override;
     virtual void setCameraOrientation(const std::string& camera_name, const Quaternionr& orientation) override;
     virtual CollisionInfo getCollisionInfo() const override;
     virtual int getRemoteControlID() const override;
+	ASimRadDetector* getRadDetector();
     virtual msr::airlib::RCData getRCData() const override;
     virtual std::string getVehicleName() const override
     {
@@ -90,6 +93,10 @@ public: //implementation of VehicleSimApiBase
     virtual void updateRenderedState(float dt) override;
     virtual void updateRendering(float dt) override;
     virtual const msr::airlib::Kinematics::State* getGroundTruthKinematics() const override;
+
+	//David added method
+	virtual const msr::airlib::Vector3r getPositionWRTOrigin() const override;
+
     virtual const msr::airlib::Environment* getGroundTruthEnvironment() const override;
     virtual std::string getRecordFileLine(bool is_header_line) const override;
 
@@ -131,6 +138,8 @@ private: //methods
     void detectUsbRc();
     void setupCamerasFromSettings(const common_utils::UniqueValueMap<std::string, APIPCamera*>& cameras);
     void createCamerasFromSettings();
+	void createRadSensor();
+	void showPawnPath(bool showPath, float debug_line_life_time, float debug_line_thickness);
     //on collision, pawns should update this
     void onCollision(class UPrimitiveComponent* MyComp, class AActor* Other, class UPrimitiveComponent* OtherComp,
         bool bSelfMoved, FVector HitLocation, FVector HitNormal, FVector NormalImpulse, const FHitResult& Hit);
@@ -141,11 +150,15 @@ private: //methods
     void updateKinematics(float dt);
     void setStartPosition(const FVector& position, const FRotator& rotator);
 
+	template<typename T>
+	void FindAllActors(UWorld* World, TArray<T*>& Out);
+
 private: //vars
     typedef msr::airlib::AirSimSettings AirSimSettings;
 
     Params params_;
     common_utils::UniqueValueMap<std::string, APIPCamera*> cameras_;
+	ASimRadDetector* rad_detector_;
     msr::airlib::GeoPoint home_geo_point_;
 
     std::string vehicle_name_;
@@ -155,6 +168,9 @@ private: //vars
     FVector ground_margin_;
     std::unique_ptr<UnrealImageCapture> image_capture_;
     std::string log_line_;
+	bool showPath_;
+	float debug_line_lifetime_;
+	float debug_line_thickness_;
 
     mutable msr::airlib::RCData rc_data_;
     mutable SimJoyStick joystick_;

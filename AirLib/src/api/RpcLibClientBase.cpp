@@ -159,10 +159,15 @@ msr::airlib::GeoPoint RpcLibClientBase::getHomeGeoPoint(const std::string& vehic
     return pimpl_->client.call("getHomeGeoPoint", vehicle_name).as<RpcLibAdapatorsBase::GeoPoint>().to();
 }
 
+float RpcLibClientBase::getRadSensorData(const std::string& vehicle_name) {
+	return pimpl_->client.call("getRadSensorData", vehicle_name).as<float>();
+}
+
 msr::airlib::LidarData RpcLibClientBase::getLidarData(const std::string& lidar_name, const std::string& vehicle_name) const
 {
     return pimpl_->client.call("getLidarData", lidar_name, vehicle_name).as<RpcLibAdapatorsBase::LidarData>().to();
 }
+
 
 bool RpcLibClientBase::simSetSegmentationObjectID(const std::string& mesh_name, int object_id, bool is_name_regex)
 {
@@ -217,6 +222,10 @@ void RpcLibClientBase::simShowDebugLines(double x1, double y1, double z1, double
 	pimpl_->client.call("simShowDebugLines", x1, y1, z1, x2, y2, z2, thickness, lifetime, debug_line_color);
 }
 
+void RpcLibClientBase::simShowPawnPath(bool showPath, float debug_line_life_time, float debug_line_thickness, const std::string& vehicle_name) {
+	pimpl_->client.call("showPawnPath", showPath, debug_line_life_time, debug_line_thickness, vehicle_name);
+}
+
 void RpcLibClientBase::showPlannedWaypoints(double x1, double y1, double z1, double x2, double y2, double z2, double thickness, double lifetime, const std::string & debug_line_color, const std::string& vehicle_name)
 {
 	pimpl_->client.call("simShowPlannedWaypoints", x1, y1, z1, x2, y2, z2, thickness, lifetime, debug_line_color, vehicle_name);
@@ -259,6 +268,13 @@ msr::airlib::Kinematics::State RpcLibClientBase::simGetGroundTruthKinematics(con
 {
     return pimpl_->client.call("simGetGroundTruthKinematics", vehicle_name).as<RpcLibAdapatorsBase::KinematicsState>().to();
 }
+
+//David defined method
+msr::airlib::Vector3r RpcLibClientBase::simGetPositionWRTOrigin(const std::string& vehicle_name) const
+{
+	return pimpl_->client.call("simGetPositionWRTOrigin", vehicle_name).as<RpcLibAdapatorsBase::Vector3r>().to();
+}
+
 msr::airlib::Environment::State RpcLibClientBase::simGetGroundTruthEnvironment(const std::string& vehicle_name) const
 {
     return pimpl_->client.call("simGetGroundTruthEnvironment", vehicle_name).as<RpcLibAdapatorsBase::EnvironmentState>().to();;
@@ -298,7 +314,7 @@ void RpcLibClientBase::simCharSetFaceExpression(const std::string& expression_na
 
 float RpcLibClientBase::simCharGetFaceExpression(const std::string& expression_name, const std::string& character_name) const
 {
-    return pimpl_->client.call("simCharGetFaceExpression", expression_name, character_name).as<float>();
+	return pimpl_->client.call("simCharGetFaceExpression", expression_name, character_name).as<float>();
 }
 
 std::vector<std::string> RpcLibClientBase::simCharGetAvailableFaceExpressions()

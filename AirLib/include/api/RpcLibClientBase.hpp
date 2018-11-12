@@ -49,6 +49,7 @@ public:
 
 	void simShowDebugLines(double x1, double y1, double z1, double x2, double y2, double z2, double thickness, double lifetime, const std::string& debug_line_color);
 	void showPlannedWaypoints(double x1, double y1, double z1, double x2, double y2, double z2, double thickness, double lifetime, const std::string& debug_line_color, const std::string& vehicle_name = "");
+	void simShowPawnPath(bool showPath, float debug_line_life_time, float debug_line_thickness, const std::string& vehicle_name = "");
 
     bool armDisarm(bool arm, const std::string& vehicle_name = "");
     bool isApiControlEnabled(const std::string& vehicle_name = "") const;
@@ -57,6 +58,8 @@ public:
     msr::airlib::GeoPoint getHomeGeoPoint(const std::string& vehicle_name = "") const;
 
     msr::airlib::LidarData getLidarData(const std::string& lidar_name = "", const std::string& vehicle_name = "") const;
+
+	float getRadSensorData(const std::string& vehicle_name = "");
 
     Pose simGetVehiclePose(const std::string& vehicle_name = "") const;
     void simSetVehiclePose(const Pose& pose, bool ignore_collision, const std::string& vehicle_name = "");
@@ -71,6 +74,8 @@ public:
 
     msr::airlib::Kinematics::State simGetGroundTruthKinematics(const std::string& vehicle_name = "") const;
     msr::airlib::Environment::State simGetGroundTruthEnvironment(const std::string& vehicle_name = "") const;
+
+	msr::airlib::Vector3r simGetPositionWRTOrigin(const std::string& vehicle_name = "") const;
 
     //----------- APIs to control ACharacter in scene ----------/
     void simCharSetFaceExpression(const std::string& expression_name, float value, const std::string& character_name = "");

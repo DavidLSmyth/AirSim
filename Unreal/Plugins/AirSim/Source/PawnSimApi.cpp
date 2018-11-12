@@ -9,6 +9,9 @@
 #include "PIPCamera.h"
 #include "NedTransform.h"
 #include "common/EarthUtils.hpp"
+#include "SimRadDetector.h"
+#include "Vehicles/Multirotor/FlyingPawn.h"
+#include "vehicles/Multirotor/FlyingPawn.h"
 
 #include "DrawDebugHelpers.h"
 
@@ -39,8 +42,14 @@ PawnSimApi::PawnSimApi(const Params& params)
     initial_state_.was_last_move_teleport = canTeleportWhileMove();
 
     setupCamerasFromSettings(params_.cameras);
+	createRadSensor();
+
+	//should these be set here?
+	showPath_ = false;
+	debug_line_lifetime_ = 60;
+	debug_line_thickness_ = 20;
+
 	image_capture_.reset(new UnrealImageCapture(&cameras_));
-	
     //add listener for pawn's collision event
     params_.pawn_events->getCollisionSignal().connect_member(this, &PawnSimApi::onCollision);
     params_.pawn_events->getPawnTickSignal().connect_member(this, &PawnSimApi::pawnTick);
@@ -62,10 +71,10 @@ void PawnSimApi::setStartPosition(const FVector& position, const FRotator& rotat
 
 void PawnSimApi::pawnTick(float dt)
 {
-
     update();
     updateRenderedState(dt);
     updateRendering(dt);
+
 }
 
 void PawnSimApi::detectUsbRc()
@@ -120,6 +129,8 @@ void PawnSimApi::createCamerasFromSettings()
         FVector position = transform.fromLocalNed(
             NedTransform::Vector3r(setting.position.x(), setting.position.y(), setting.position.z()))
             - transform.fromLocalNed(NedTransform::Vector3r(0.0, 0.0, 0.0));
+
+
         FTransform camera_transform(FRotator(setting.rotation.pitch, setting.rotation.yaw, setting.rotation.roll),
             position, FVector(1., 1., 1.));
 
@@ -131,6 +142,39 @@ void PawnSimApi::createCamerasFromSettings()
         cameras_.insert_or_assign(camera_setting_pair.first, camera);
     }
 }
+
+//create the radiation sensor for the RAV
+void PawnSimApi::createRadSensor() {
+
+	USceneComponent* bodyMesh = params_.pawn->GetRootComponent();
+	FActorSpawnParameters rad_sensor_spawn_params;
+	rad_sensor_spawn_params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
+	const auto& transform = getNedTransform();
+
+	//set position as bounding box as depth divided by 1.5
+	FVector position = transform.fromLocalNed(
+		NedTransform::Vector3r(0, 0, params_.pawn->GetComponentsBoundingBox(0).GetSize().Z/1.5))- transform.fromLocalNed(NedTransform::Vector3r(0.0, 0.0, 0.0));
+
+	FTransform rad_sensor_transform(FRotator(0, 0, 0),
+		position, FVector(1., 1., 1.));
+
+	UAirBlueprintLib::LogMessageString("Creating radiation sensor and attaching it to RAV", "", LogDebugLevel::Informational, 20);
+	//attach sensor to pawn
+	ASimRadDetector* rad_detector = params_.pawn->GetWorld()->SpawnActor<ASimRadDetector>(ASimRadDetector::StaticClass(), rad_sensor_transform, rad_sensor_spawn_params);
+	//rad_detector->AttachToComponent(bodyMesh, FAttachmentTransformRules::KeepRelativeTransform);
+	rad_detector->AttachToActor(getPawn(), FAttachmentTransformRules::KeepRelativeTransform);
+	rad_detector_ = rad_detector;
+}
+
+void PawnSimApi::showPawnPath(bool showPath, float debug_line_life_time, float debug_line_thickness)
+{
+	UAirBlueprintLib::LogMessageString("Set showpath to " + std::to_string(showPath) + "\n set debug_line lifetime to "
+		+ std::to_string(debug_line_life_time) + "\nset debug_line_thickness to" + std::to_string(debug_line_thickness), "", LogDebugLevel::Informational, 5);
+	showPath_ = showPath;
+	debug_line_lifetime_ = debug_line_life_time;
+	debug_line_thickness_ = debug_line_thickness;
+}
+
 
 void PawnSimApi::onCollision(class UPrimitiveComponent* MyComp, class AActor* Other, class UPrimitiveComponent* OtherComp, 
     bool bSelfMoved, FVector HitLocation, FVector HitNormal, FVector NormalImpulse, const FHitResult& Hit)
@@ -256,6 +300,10 @@ int PawnSimApi::getRemoteControlID() const
     return getVehicleSetting()->rc.remote_control_id;
 }
 
+ASimRadDetector* PawnSimApi::getRadDetector() {
+	return rad_detector_;
+}
+
 const APIPCamera* PawnSimApi::getCamera(const std::string& camera_name) const
 {
     return cameras_.findOrDefault(camera_name, nullptr);
@@ -322,6 +370,7 @@ PawnSimApi::CollisionInfo PawnSimApi::getCollisionInfo() const
     return state_.collision_info;
 }
 
+//David comment - this seems to return the actors location with respect to the origin
 FVector PawnSimApi::getUUPosition() const
 {
     return params_.pawn->GetActorLocation(); // - state_.mesh_origin
@@ -373,10 +422,81 @@ void PawnSimApi::plot(std::istream& s, FColor color, const Vector3r& offset)
 }
 
 void PawnSimApi::showPlannedWaypoints(double x1, double y1, double z1, double x2, double y2, double z2, double thickness, double lifetime, const std::string debug_line_color) {
-	AActor* pawn = getPawn();
 	FVector p1 = ned_transform_.fromLocalNed(Vector3r(x1, y1, z1));
 	FVector p2 = ned_transform_.fromLocalNed(Vector3r(x2, y2, z2));
-	UAirBlueprintLib::showDebugLine(pawn->GetWorld(), p1.X, p1.Y, p1.Z, p2.X, p2.Y, p2.Z, thickness, lifetime, debug_line_color);
+	UAirBlueprintLib::showDebugLine(getPawn()->GetWorld(), p1.X, p1.Y, p1.Z, p2.X, p2.Y, p2.Z, thickness, lifetime, debug_line_color);
+}
+
+template<typename T>
+void PawnSimApi::FindAllActors(UWorld* World, TArray<T*>& Out)
+{
+	for (TActorIterator<AActor> It(World, T::StaticClass()); It; ++It)
+	{
+		T* Actor = Cast<T>(*It);
+		if (Actor && !Actor->IsPendingKill())
+		{
+			Out.Add(Actor);
+		}
+	}
+}
+
+float PawnSimApi::getRadSensorData(){
+	//UAirBlueprintLib::LogMessageString("Read radiation as ", std::to_string(rad_detector_->getRadiationReading()), LogDebugLevel::Informational, 20);
+	//rad_detector_->getSourcesLevels();
+	
+	//UAirBlueprintLib::LogMessageString("Returning radiation reading ", std::to_string(rad_detector_->getRadiationReading()), LogDebugLevel::Informational, 60);
+	AFlyingPawn* pawn = static_cast<AFlyingPawn*>(getPawn());
+	pawn->getSourcesLevels();
+
+	UAirBlueprintLib::LogMessageString("Returning radiation reading ", std::to_string(pawn->getRadiationReading()), LogDebugLevel::Informational, 60);
+	//return pawn->getRadiationReading();
+	for (const TPair<AActor*, float>& pair : rad_detector_->radLevelFromSource) {
+		pawn->TakeDamage(pair.Value, FDamageEvent::FDamageEvent(), pair.Key->GetInstigatorController(), pair.Key);
+	}
+	return pawn->getRadiationReading();
+	//return rad_detector_->getRadiationReading();
+	/*
+	USceneComponent* bodyMesh = params_.pawn->GetRootComponent();
+	//bodyMesh->GetChildComponent()
+	AActor* pawn = getPawn();
+	//pawn->UChildActorComponent(
+	TArray<USceneComponent*> children;
+	bodyMesh->GetChildrenComponents(true, children);
+
+	//camera_back_center_ = Cast<APIPCamera>(
+	//	(UAirBlueprintLib::GetActorComponent<UChildActorComponent>(this, TEXT("BackCenterCamera")))->GetChildActor());
+
+	ASimRadDetector* detector = Cast<ASimRadDetector>(
+		(UAirBlueprintLib::GetActorComponent<UChildActorComponent>(pawn, TEXT("SimRadDetector")))->GetChildActor());
+
+	UAirBlueprintLib::LogMessage("found detector: ", detector->GetDebugName(detector), LogDebugLevel::Informational, 20);
+	TArray<AActor*> outActors;
+	getPawn()->GetAttachedActors(outActors);
+	UAirBlueprintLib::LogMessageString("found " + std::to_string(outActors.Num()), "attached actors", LogDebugLevel::Informational, 20);
+	int counter = 0;
+	for (counter; counter < outActors.Num(); counter++) {
+		UAirBlueprintLib::LogMessage("found attached actor: ", outActors[counter]->GetName(), LogDebugLevel::Informational, 30);
+	}
+	
+	UAirBlueprintLib::LogMessageString("found ", std::to_string(children.Num()) + "children of ", LogDebugLevel::Informational, 20);
+	UAirBlueprintLib::LogMessage(bodyMesh->GetName(), "", LogDebugLevel::Informational, 20);
+	for (UActorComponent* child : children) {
+		UAirBlueprintLib::LogMessage("Found child of multirotor: ", child->GetName(), LogDebugLevel::Informational, 20);
+		if (child->IsA(ASimRadDetector::StaticClass())) {
+			ASimRadDetector* detector = Cast<ASimRadDetector>(child);
+			UAirBlueprintLib::LogMessage("Found actor with SimRadDetector: ", child->GetName(), LogDebugLevel::Informational, 20);
+			return detector->getRadiationReading();
+		}
+		else {
+			continue;
+		}
+	}
+	UAirBlueprintLib::LogMessageString("Couldnt get radiation reading, returning -1", "", LogDebugLevel::Informational, 20);
+	return -1;
+	
+	UAirBlueprintLib::LogMessageString("Read radiation as ", std::to_string(detector->getRadiationReading()), LogDebugLevel::Informational, 20);
+	return detector->getRadiationReading();
+	*/
 }
 
 msr::airlib::CameraInfo PawnSimApi::getCameraInfo(const std::string& camera_name) const
@@ -449,6 +569,10 @@ void PawnSimApi::setPoseInternal(const Pose& pose, bool ignore_collision)
     else if (!state_.tracing_enabled) {
         state_.last_position = position;
     }
+
+	if (showPath_) {
+		DrawDebugLine(getPawn()->GetWorld(), state_.last_position, position, FColor::Red, false, debug_line_lifetime_, uint8(0), debug_line_thickness_);
+	}
 }
 
 void PawnSimApi::setDebugPose(const Pose& debug_pose)
@@ -514,6 +638,13 @@ const msr::airlib::Kinematics::State* PawnSimApi::getGroundTruthKinematics() con
 {
     return &kinematics_;
 }
+
+const msr::airlib::Vector3r PawnSimApi::getPositionWRTOrigin() const
+{
+	FVector pawn_position = params_.pawn->GetActorLocation();
+	return Vector3r(pawn_position.X, pawn_position.Y, pawn_position.Z);
+}
+
 const msr::airlib::Environment* PawnSimApi::getGroundTruthEnvironment() const
 {
     return environment_.get();

@@ -50,6 +50,9 @@ class VehicleClient:
     def getHomeGeoPoint(self, vehicle_name = ''):
         return GeoPoint.from_msgpack(self.client.call('getHomeGeoPoint', vehicle_name))
 
+    def getRadSensorData(self, vehicle_name = ''):
+        return self.client.call('getRadSensorData', vehicle_name)
+        
     def confirmConnection(self):
         if self.ping():
             print("Connected!")
@@ -119,6 +122,9 @@ class VehicleClient:
         
     def simShowDebugLines(self, x1, y1, z1, x2, y2, z2, thickness=50, lifetime=10, debug_line_color='red'):
         self.client.call('simShowDebugLines', x1, y1, z1, x2, y2, z2, thickness, lifetime, debug_line_color)
+        
+    def simShowPawnPath(self, showPath:'bool', debug_line_lifetime, debug_line_thickness, vehicle_name = ''):
+        self.client.call('simShowPawnPath', showPath, debug_line_lifetime, debug_line_thickness, vehicle_name)
         
     def simGetCameraInfo(self, camera_name, vehicle_name = ''):
         # TODO: below str() conversion is only needed for legacy reason and should be removed in future

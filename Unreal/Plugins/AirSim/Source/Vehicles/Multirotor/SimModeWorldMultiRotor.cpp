@@ -113,6 +113,7 @@ PawnEvents* ASimModeWorldMultiRotor::getVehiclePawnEvents(APawn* pawn) const
 {
     return static_cast<TVehiclePawn*>(pawn)->getPawnEvents();
 }
+
 const common_utils::UniqueValueMap<std::string, APIPCamera*> ASimModeWorldMultiRotor::getVehiclePawnCameras(
     APawn* pawn) const
 {

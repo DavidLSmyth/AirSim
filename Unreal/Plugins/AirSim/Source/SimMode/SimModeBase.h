@@ -60,6 +60,8 @@ public:
 
     const NedTransform& getGlobalNedTransform();
 
+	virtual TArray<AActor*> getRadSources();
+
     msr::airlib::ApiProvider* getApiProvider() const
     {
         return api_provider_.get();

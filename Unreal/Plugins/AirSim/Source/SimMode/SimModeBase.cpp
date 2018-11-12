@@ -128,6 +128,12 @@ void ASimModeBase::EndPlay(const EEndPlayReason::Type EndPlayReason)
     Super::EndPlay(EndPlayReason);
 }
 
+TArray<AActor*> ASimModeBase::getRadSources() {
+	TArray<AActor*> rad_sources;
+	UGameplayStatics::GetAllActorsOfClass(this->GetWorld(), ASimRadiation::StaticClass(), rad_sources);
+	return rad_sources;
+}
+
 void ASimModeBase::setupTimeOfDay()
 {
     sky_sphere_ = nullptr;

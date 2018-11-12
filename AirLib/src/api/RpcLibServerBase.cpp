@@ -138,10 +138,11 @@ RpcLibServerBase::RpcLibServerBase(ApiProvider* api_provider, const std::string&
 		getWorldSimApi()->showDebugLine(x1, y1, z1, x2, y2, z2, thickness, lifetime, debug_line_color);
 	});
 
+	pimpl_->server.bind("simShowPawnPath", [&](bool showPath, float debug_line_life_time, float debug_line_thickness, const std::string& vehicle_name) -> void {
+		getVehicleSimApi(vehicle_name)->showPawnPath(showPath, debug_line_life_time, debug_line_thickness);
+	});
+
 	pimpl_->server.bind("simShowPlannedWaypoints", [&](double x1, double y1, double z1, double x2, double y2, double z2, double thickness, double lifetime, const std::string debug_line_color, const std::string& vehicle_name) -> void {
-		//vector<Vector3r> conv_path;
-		//RpcLibAdapatorsBase::to(path, conv_path);
-		//getWorldSimApi()->showDebugLine(x1, y1, z1, x2, y2, z2, thickness, lifetime, debug_line_color);
 		getVehicleSimApi(vehicle_name)->showPlannedWaypoints(x1, y1, z1, x2, y2, z2, thickness, lifetime, debug_line_color);
 	});
 
@@ -150,6 +151,10 @@ RpcLibServerBase::RpcLibServerBase(ApiProvider* api_provider, const std::string&
         const auto& geo_point = getVehicleApi(vehicle_name)->getHomeGeoPoint();
         return RpcLibAdapatorsBase::GeoPoint(geo_point);
     });
+
+	pimpl_->server.bind("getRadSensorData", [&](const std::string& vehicle_name) -> float {
+		return getVehicleSimApi(vehicle_name)->getRadSensorData();
+	});
 
     pimpl_->server.bind("getLidarData", [&](const std::string& lidar_name, const std::string& vehicle_name) -> RpcLibAdapatorsBase::LidarData {
         const auto& lidar_data = getVehicleApi(vehicle_name)->getLidarData(lidar_name);
@@ -188,6 +193,10 @@ RpcLibServerBase::RpcLibServerBase(ApiProvider* api_provider, const std::string&
         const Environment::State& result = (*getVehicleSimApi(vehicle_name)->getGroundTruthEnvironment()).getState();
         return RpcLibAdapatorsBase::EnvironmentState(result);
     });
+
+	pimpl_->server.bind("simGetPositionWRTOrigin", [&](const std::string& vehicle_name) -> RpcLibAdapatorsBase::Vector3r {
+		return getVehicleSimApi(vehicle_name)->getPositionWRTOrigin();
+	});
 
     pimpl_->server.bind("cancelLastTask", [&](const std::string& vehicle_name) -> void {
         getVehicleApi(vehicle_name)->cancelLastTask();
