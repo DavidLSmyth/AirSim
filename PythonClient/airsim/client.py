@@ -126,6 +126,10 @@ class VehicleClient:
     def simShowPawnPath(self, showPath:'bool', debug_line_lifetime, debug_line_thickness, vehicle_name = ''):
         self.client.call('simShowPawnPath', showPath, debug_line_lifetime, debug_line_thickness, vehicle_name)
         
+    def simGetPositionWRTOrigin(self, vehicle_name = ''):
+        position = self.client.call('simGetPositionWRTOrigin', vehicle_name)
+        return Vector3r.from_msgpack(position)
+        
     def simGetCameraInfo(self, camera_name, vehicle_name = ''):
         # TODO: below str() conversion is only needed for legacy reason and should be removed in future
         return CameraInfo.from_msgpack(self.client.call('simGetCameraInfo', str(camera_name), vehicle_name))
