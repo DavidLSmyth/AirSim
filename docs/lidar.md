@@ -2,75 +2,107 @@
 
 AirSim supports Lidar for multirotors and cars. 
 
-The enablement of lidar and the configuration currently requires manual changes to the code; but that will be fixed soon.
+The enablement of lidar and the other lidar settings can be configured via AirSimSettings json.
+Please see [general sensors](sensors.md) for information on configruation of general/shared sensor settings.
 
 ## Enabling lidar on a vehicle
-For multirotors, please update the EnabledSensors struct in file [MultiRotorParams.hpp](../AirLib/include/vehicles/multirotor) and set lidar to `true`.
-
-```cpp
-
-// File location: https://github.com/Microsoft/AirSim/blob/master/AirLib/include/vehicles/multirotor/MultiRotor.hpp
-
-struct EnabledSensors {
-        bool imu = true;
-        bool magnetometer = true;
-        bool gps = true;
-        bool barometer = true;
-        bool distance = false; 
-        bool lidar = false;     //set this to true 
-    };
+* By default, lidars are not enabled. To enable lidar, set the SensorType and Enabled attributes in settings json.
 ```
-
-For cars, please update the EnabledSensors struct in file [CarApiBase.hpp](../AirLib/include/vehicles/car/api) and set lidar to `true`.
-
-```cpp
-
-// File location: https://github.com/Microsoft/AirSim/blob/master/AirLib/include/vehicles/car/api/CarApiBase.hpp
-
-struct EnabledSensors {
-        bool imu = false;
-        bool magnetometer = false;
-        bool gps = false;
-        bool barometer = false;
-        bool distance = false; 
-        bool lidar = true;     //set this to true 
-    };
+        "Lidar1": { 
+             "SensorType": 6,
+             "Enabled" : true,
 ```
+* Multiple lidars can be enabled on a vehicle.
 
 ## Lidar configuration
-Update the Lidar configuration as needed in file [LidarSimpleParams.hpp](../AirLib/include/sensors/lidar).
-The following parameters can be configured right now:
+The following parameters can be configured right now via settings json.
 
-Parameter                      | Description
------------------------------- | ------------
-number_of_channels             | Number of channels/lasers of the lidar
-range                          | Range, in meters
-points_per_second              | Number of points captured per second
-horizontal_rotation_frequency  | Rotations per second
-vertical_FOV_Upper             | Vertical FOV upper limit for the lidar, in degrees
-vertical_FOV_Lower             | Vertical FOV lower limit for the lidar, in degrees
-relative_pose                  | Position and rotation of the lidar relative to the vehicle                     
+Parameter                 | Description
+--------------------------| ------------
+NumberOfChannels          | Number of channels/lasers of the lidar
+Range                     | Range, in meters
+PointsPerSecond           | Number of points captured per second
+RotationsPerSecond        | Rotations per second
+HorizontalFOVStart        | Horizontal FOV start for the lidar, in degrees
+HorizontalFOVEnd          | Horizontal FOV end for the lidar, in degrees
+VerticalFOVUpper          | Vertical FOV upper limit for the lidar, in degrees
+VerticalFOVLower          | Vertical FOV lower limit for the lidar, in degrees
+X Y Z                     | Position of the lidar relative to the vehicle (in NED, in meters)                     
+Roll Pitch Yaw            | Orientation of the lidar relative to the vehicle  (in degrees, yaw-pitch-roll order to front vector +X)
+DataFrame                 | Frame for the points in output ("VehicleInertialFrame" or "SensorLocalFrame")
+
+e.g.,
+```
+{
+    "SeeDocsAt": "https://github.com/Microsoft/AirSim/blob/master/docs/settings_json.md",
+    "SettingsVersion": 1.2,
+
+    "SimMode": "Multirotor",
+
+     "Vehicles": {
+		"Drone1": {
+			"VehicleType": "simpleflight",
+			"AutoCreate": true,
+			"Sensors": {
+			    "LidarSensor1": { 
+					"SensorType": 6,
+					"Enabled" : true,
+					"NumberOfChannels": 16,
+					"RotationsPerSecond": 10,
+					"PointsPerSecond": 100000,
+					"X": 0, "Y": 0, "Z": -1,
+					"Roll": 0, "Pitch": 0, "Yaw" : 0,
+					"VerticalFOVUpper": -15,
+					"VerticalFOVLower": -25,
+					"HorizontalFOVStart": -20,
+					"HorizontalFOVEnd": 20,
+					"DrawDebugPoints": true,
+					"DataFrame": "SensorLocalFrame"
+				},
+				"LidarSensor2": { 
+				   "SensorType": 6,
+					"Enabled" : true,
+					"NumberOfChannels": 4,
+					"RotationsPerSecond": 10,
+					"PointsPerSecond": 10000,
+					"X": 0, "Y": 0, "Z": -1,
+					"Roll": 0, "Pitch": 0, "Yaw" : 0,
+					"VerticalFOVUpper": -15,
+					"VerticalFOVLower": -25,
+					"DrawDebugPoints": true,
+					"DataFrame": "SensorLocalFrame"
+				}
+			}
+		}
+    }
+}
+```
 
 ## Server side visualization for debugging
-Be default, the lidar points are not drawn on the viewport. To enable the drawing of hit laser points on the viewport, please update the code in file [SimModeBase.h](../Unreal/Plugins/AirSim/Source/SimMode).
-Set `draw_lidar_debug_points_` to true.
-
-```cpp
-
-bool draw_lidar_debug_points_ = false;    // set this to true
-
+Be default, the lidar points are not drawn on the viewport. To enable the drawing of hit laser points on the viewport, please enable setting 'DrawDebugPoints' via settings json.
+e.g.,
+```
+        "Lidar1": { 
+             ...
+             "DrawDebugPoints": true
+        },
 ```
 
 ## Client API 
 Use `getLidarData()` API to retrieve the Lidar data. 
-* The API returns a Point-Cloud as a flat array of floats along with a timestamp of the capture.
-* The floats represent [x,y,z] coordinate for each point hit within the range in the last scan.
-* The coordinates are in the local vehicle NED like all other AirSim APIs.
+* The API returns a Point-Cloud as a flat array of floats along with the timestamp of the capture and lidar pose.
+* Point-Cloud: 
+  * The floats represent [x,y,z] coordinate for each point hit within the range in the last scan.
+  * The frame for the points in the output is configurable using "DataFrame" attribute
+  "" or "VehicleInertialFrame" -- default; returned points are in vehicle inertial frame (in NED, in meters)
+  "SensorLocalFrame" -- returned points are in lidar local frame (in NED, in meters)
+* Lidar Pose:
+    * Lidar pose in the vehicle inertial frame (in NED, in meters)
+    * Can be used to transform points to other frames.
 
 ### Python Examples
-[drone_lidar.py](../PythonClient/multirotor)
-[car_lidar.py](../PythonClient/car)
+[drone_lidar.py](https://github.com/Microsoft/AirSim/tree/master/PythonClient//multirotor)
+[car_lidar.py](https://github.com/Microsoft/AirSim/tree/master/PythonClient//car)
 
 ## Coming soon
-* Configuration of lidar parameters via AirSim settings.
 * Visualization of lidar data on client side.

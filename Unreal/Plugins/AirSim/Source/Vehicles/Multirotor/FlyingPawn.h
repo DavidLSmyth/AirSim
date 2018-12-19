@@ -7,6 +7,7 @@
 #include "common/common_utils/Signal.hpp"
 #include "common/common_utils/UniqueValueMap.hpp"
 #include "MultirotorPawnEvents.h"
+#include "SimRadDetector.h"
 
 #include "FlyingPawn.generated.h"
 
@@ -17,13 +18,26 @@ class AIRSIM_API AFlyingPawn : public APawn
 
 public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Debugging")
-    float RotatorFactor = 1.0f;
+		float RotatorFactor = 1.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Debugging")
 		bool TracePath = false;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Debugging")
 		float LifeTime = 60.0;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Debugging")
+		bool showPath = false;
+
+	UPROPERTY()
+		TMap<AActor*, float> radLevelFromSource;
+		//std::map<AActor*, float> radLevelFromSource;
+
+
+	//add damage event here
+	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const & DamageEvent, class AController * EventInstigator, AActor * DamageCauser) override;
+	//virtual float ReceiveAnyDamage(float DamageAmount, FDamageEvent const & DamageEvent, AController * EventInstigator, AActor * DamageCauser) override;
+	virtual float getRadiationReading();
 
     AFlyingPawn();
     virtual void BeginPlay() override;
@@ -32,16 +46,21 @@ public:
     virtual void NotifyHit(class UPrimitiveComponent* MyComp, class AActor* Other, class UPrimitiveComponent* OtherComp, bool bSelfMoved, FVector HitLocation,
         FVector HitNormal, FVector NormalImpulse, const FHitResult& Hit) override;
 
+	void getSourcesLevels();
+
+	template<typename T>
+	void FindAllActors(UWorld* World, TArray<T*>& Out);
+
     //interface
     void initializeForBeginPlay();
     const common_utils::UniqueValueMap<std::string, APIPCamera*> getCameras() const;
+
     MultirotorPawnEvents* getPawnEvents()
     {
         return &pawn_events_;
     }
     //called by API to set rotor speed
     void setRotorSpeed(const std::vector<MultirotorPawnEvents::RotorInfo>& rotor_infos);
-
 
 private: //variables
     //Unreal components
@@ -56,5 +75,7 @@ private: //variables
 
     MultirotorPawnEvents pawn_events_;
 	FVector PrevLocation;
+
+	UPROPERTY() ASimRadDetector* rad_detector_;
 	
 };

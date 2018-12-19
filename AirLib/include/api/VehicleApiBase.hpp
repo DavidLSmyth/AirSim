@@ -86,7 +86,7 @@ public:
     //get reading from RC bound to vehicle (if unsupported then RCData::is_valid = false)
     virtual RCData getRCData() const
     {
-        static const RCData invalid_rc_data;
+        static const RCData invalid_rc_data {};
         return invalid_rc_data;
     }
     //set external RC data to vehicle (if unsupported then returns false)
@@ -107,13 +107,13 @@ public:
     {
         const LidarBase* lidar = nullptr;
 
-        // Find lidar with the given name
+        // Find lidar with the given name (for empty input name, return the first one found)
         // Not efficient but should suffice given small number of lidars
         uint count_lidars = getSensors().size(SensorBase::SensorType::Lidar);
         for (uint i = 0; i < count_lidars; i++)
         {
             const LidarBase* current_lidar = static_cast<const LidarBase*>(getSensors().getByType(SensorBase::SensorType::Lidar, i));
-            if (current_lidar != nullptr && current_lidar->getName() == lidar_name)
+            if (current_lidar != nullptr && (current_lidar->getName() == lidar_name || lidar_name == ""))
             {
                 lidar = current_lidar;
                 break;

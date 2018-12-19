@@ -10,6 +10,7 @@
 #include "physics/Environment.hpp"
 #include "common/ImageCaptureBase.hpp"
 #include "safety/SafetyEval.hpp"
+#include "api/WorldSimApiBase.hpp"
 
 #include "common/common_utils/WindowsApisCommonPre.hpp"
 #include "rpc/msgpack.hpp"
@@ -381,6 +382,7 @@ public:
         std::vector<uint8_t> image_data_uint8;
         std::vector<float> image_data_float;
 
+        std::string camera_name;
         Vector3r camera_position;
         Quaternionr camera_orientation;
         msr::airlib::TTimePoint time_stamp;
@@ -390,7 +392,7 @@ public:
         int width, height;
         msr::airlib::ImageCaptureBase::ImageType image_type;
 
-        MSGPACK_DEFINE_MAP(image_data_uint8, image_data_float, camera_position, 
+        MSGPACK_DEFINE_MAP(image_data_uint8, image_data_float, camera_position, camera_name,
             camera_orientation, time_stamp, message, pixels_as_float, compress, width, height, image_type);
 
         ImageResponse()
@@ -409,6 +411,7 @@ public:
             if (image_data_float.size() == 0)
                 image_data_float.push_back(0);
 
+            camera_name = s.camera_name;
             camera_position = Vector3r(s.camera_position);
             camera_orientation = Quaternionr(s.camera_orientation);
             time_stamp = s.time_stamp;
@@ -430,6 +433,7 @@ public:
             else
                 d.image_data_float = image_data_float;
 
+            d.camera_name = camera_name;
             d.camera_position = camera_position.to();
             d.camera_orientation = camera_orientation.to();
             d.time_stamp = time_stamp;
@@ -466,8 +470,9 @@ public:
 
         msr::airlib::TTimePoint time_stamp;    // timestamp
         std::vector<float> point_cloud;        // data
+        Pose pose;
 
-        MSGPACK_DEFINE_MAP(time_stamp, point_cloud);
+        MSGPACK_DEFINE_MAP(time_stamp, point_cloud, pose);
 
         LidarData()
         {}
@@ -480,6 +485,8 @@ public:
             //TODO: remove bug workaround for https://github.com/rpclib/rpclib/issues/152
             if (point_cloud.size() == 0)
                 point_cloud.push_back(0);
+
+            pose = s.pose;
         }
 
         msr::airlib::LidarData to() const
@@ -488,6 +495,7 @@ public:
 
             d.time_stamp = time_stamp;
             d.point_cloud = point_cloud;
+            d.pose = pose.to();
 
             return d;
         }
@@ -499,6 +507,6 @@ public:
 MSGPACK_ADD_ENUM(msr::airlib::SafetyEval::SafetyViolationType_);
 MSGPACK_ADD_ENUM(msr::airlib::SafetyEval::ObsAvoidanceStrategy);
 MSGPACK_ADD_ENUM(msr::airlib::ImageCaptureBase::ImageType);
-
+MSGPACK_ADD_ENUM(msr::airlib::WorldSimApiBase::WeatherParameter);
 
 #endif

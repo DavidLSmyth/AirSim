@@ -145,7 +145,8 @@ IF NOT EXIST AirLib\deps mkdir AirLib\deps
 IF NOT EXIST AirLib\deps\eigen3 (
     powershell -command "& { [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; iwr http://bitbucket.org/eigen/eigen/get/3.3.2.zip -OutFile eigen3.zip }"
     powershell -command "& { Expand-Archive -Path eigen3.zip -DestinationPath AirLib\deps }"
-    move AirLib\deps\eigen* AirLib\deps\del_eigen
+    powershell -command "& { Move-Item -Path AirLib\deps\eigen* -Destination AirLib\deps\del_eigen }"
+    REM move AirLib\deps\eigen* AirLib\deps\del_eigen
     mkdir AirLib\deps\eigen3
     move AirLib\deps\del_eigen\Eigen AirLib\deps\eigen3\Eigen
     rmdir /S /Q AirLib\deps\del_eigen
@@ -179,6 +180,7 @@ robocopy /MIR MavLinkCom\lib %MAVLINK_TARGET_LIB%
 REM //---------- all our output goes to Unreal/Plugin folder ----------
 if NOT exist Unreal\Plugins\AirSim\Source\AirLib mkdir Unreal\Plugins\AirSim\Source\AirLib
 robocopy /MIR AirLib Unreal\Plugins\AirSim\Source\AirLib  /XD temp *. /njh /njs /ndl /np
+copy /y AirSim.props Unreal\Plugins\AirSim\Source\AirLib
 
 REM //---------- done building ----------
 exit /b 0

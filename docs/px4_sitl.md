@@ -11,11 +11,11 @@ you can build and run it there.
     cd PX4
     git clone https://github.com/PX4/Firmware.git
     cd Firmware
-    make posix_sitl_default
+    git checkout v1.8.2  # Pick a well known "good" release tag.
     ```
-3. Use following command to start PX4 firmware in SITL mode:
+3. Use following command to build and start PX4 firmware in SITL mode:
     ```
-    ./build/posix_sitl_default/px4 ./posix-configs/SITL/init/ekf2/iris
+    make posix_sitl_ekf2  none_iris
     ```
 4. You should see a message like this you `INFO  [simulator] Waiting for initial data on UDP port 14560` which means the SITL PX4 app is waiting for someone to connect.
 5. Now edit [AirSim settings](settings.md) file to make sure you have followings:
@@ -30,6 +30,8 @@ you can build and run it there.
             }
         }
     }
+}
+
     ```
 6. Run Unreal environment and it should connect to SITL via UDP.  You should see a bunch of messages from the SITL PX4 window from things like `[mavlink]` and `[commander]` and so on.
 7. You should also be able to use QGroundControl just like with flight controller hardware. Note that as we don't have physical board, RC cannot be connected directly to it. So the alternatives are either use XBox 360 Controller or connect your RC using USB (for example, in case of FrSky Taranis X9D Plus) or using trainer USB cable to PC. This makes your RC look like joystick. You will need to do extra set up in QGroundControl to use virtual joystick for RC control.
@@ -49,7 +51,7 @@ You might also want to set this one so that the drone automatically hovers after
 param set COM_OBL_ACT 1
 ````
 
-Now close Unreal app, restart `./build_posix_sitl_default/src/firmware/posix/px4` and re-start the unreal app.  
+Now close Unreal app, restart the `px4` app and re-start the unreal app.  In fact, every time you stop the unreal app you have top restart the `px4` app.
 
 ## Check the Home Position
 

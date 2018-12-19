@@ -5,7 +5,7 @@
 
 #include "common/Common.hpp"
 #include "GameFramework/Actor.h"
-#include "sensors/Lidar/LidarSimple.hpp"
+#include "sensors/lidar/LidarSimple.hpp"
 #include "NedTransform.h"
 
 // UnrealLidarSensor implementation that uses Ray Tracing in Unreal.
@@ -13,7 +13,11 @@
 // Thanks to CARLA folks for this.
 class UnrealLidarSensor : public msr::airlib::LidarSimple {
 public:
-    UnrealLidarSensor(AActor* actor, const NedTransform* ned_transform);
+    typedef msr::airlib::AirSimSettings AirSimSettings;
+
+public:
+    UnrealLidarSensor(const AirSimSettings::LidarSetting& setting,
+        AActor* actor, const NedTransform* ned_transform);
 
 protected:
     virtual void getPointCloud(const msr::airlib::Pose& lidar_pose, const msr::airlib::Pose& vehicle_pose,
@@ -25,7 +29,8 @@ private:
 
     void createLasers();
     bool shootLaser(const msr::airlib::Pose& lidar_pose, const msr::airlib::Pose& vehicle_pose,
-        uint32 channel, float horizontalAngle, msr::airlib::LidarSimpleParams params, Vector3r &point);
+        const uint32 channel, const float horizontal_angle, const float vertical_angle, 
+        const msr::airlib::LidarSimpleParams params, Vector3r &point);
 
 private:
     AActor* actor_;

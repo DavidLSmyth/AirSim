@@ -15,9 +15,12 @@ namespace msr { namespace airlib {
 
 class LidarSimple : public LidarBase {
 public:
-    LidarSimple(const LidarSimpleParams& params = LidarSimpleParams())
-        : params_(params)
+    LidarSimple(const AirSimSettings::LidarSetting& setting = AirSimSettings::LidarSetting())
+        : LidarBase(setting.sensor_name)
     {
+        // initialize params
+        params_.initializeFromSettings(setting);
+
         //initialize frequency limiter
         freq_limiter_.initialize(params_.update_frequency, params_.startup_delay);
     }
@@ -51,22 +54,23 @@ public:
 
         reporter.writeValue("Lidar-NumChannels", params_.number_of_channels);
         reporter.writeValue("Lidar-Range", params_.range);
-        reporter.writeValue("Lidar-FOV-Upper", params_.vertical_FOV_Upper);
-        reporter.writeValue("Lidar-FOV-Lower", params_.vertical_FOV_Lower);
+        reporter.writeValue("Lidar-FOV-Upper", params_.vertical_FOV_upper);
+        reporter.writeValue("Lidar-FOV-Lower", params_.vertical_FOV_lower);
     }
     //*** End: UpdatableState implementation ***//
 
     virtual ~LidarSimple() = default;
 
-protected:
-    virtual void getPointCloud(const Pose& lidar_pose, const Pose& vehicle_pose, 
-        TTimeDelta delta_time, vector<real_T>& point_cloud) = 0;
-
-    const LidarSimpleParams& getParams()
+    const LidarSimpleParams& getParams() const
     {
         return params_;
     }
 
+protected:
+    virtual void getPointCloud(const Pose& lidar_pose, const Pose& vehicle_pose, 
+        TTimeDelta delta_time, vector<real_T>& point_cloud) = 0;
+
+    
 private: //methods
     void updateOutput()
     {
@@ -76,6 +80,15 @@ private: //methods
 
         const GroundTruth& ground_truth = getGroundTruth();
 
+        // calculate the pose before obtaining the point-cloud. Before/after is a bit arbitrary
+        // decision here. If the pose can change while obtaining the point-cloud (could happen for drones)
+        // then the pose won't be very accurate either way.
+        //
+        // TODO: Seems like pose is in vehicle inertial-frame (NOT in Global NED frame).
+        //    That could be a bit unintuitive but seems consistent with the position/orientation returned as part of 
+        //    ImageResponse for cameras and pose returned by getCameraInfo API.
+        //    Do we need to convert pose to Global NED frame before returning to clients?
+        Pose lidar_pose = params_.relative_pose + ground_truth.kinematics->pose;
         getPointCloud(params_.relative_pose, // relative lidar pose
             ground_truth.kinematics->pose,   // relative vehicle pose
             delta_time, 
@@ -84,6 +97,7 @@ private: //methods
         LidarData output;
         output.point_cloud = point_cloud_;
         output.time_stamp = clock()->nowNanos();
+        output.pose = lidar_pose;            
 
         last_time_ = output.time_stamp;
 

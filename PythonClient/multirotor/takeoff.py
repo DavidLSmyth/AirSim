@@ -17,7 +17,10 @@ client.showPlannedWaypoints(0, 0, 0, 20, -30, -18, thickness=10, lifetime=30, de
 client.showPlannedWaypoints(20, -30, -18, 40, -20, -30, thickness=10, lifetime=30, debug_line_color='red')
 #client.showPlannedWaypoints(6800, -50, 300, 5500, -800, 350, thickness=10, lifetime=30, debug_line_color='red')
 
+client.showPlannedPath(True, 3, 8)
 client.takeoffAsync().join()
+#showPath:'bool', debug_line_lifetime, debug_line_thickness, vehicle_name = ''):
+
 print('moving')
 client.moveToPositionAsync(20, -30, -18,4).join()
 client.moveToPositionAsync(40, -20, -30,4).join()

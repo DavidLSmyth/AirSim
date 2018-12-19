@@ -79,8 +79,6 @@ artifacts/
 *_p.c
 *_i.h
 *.ilk
-*.meta
-*.obj
 *.pch
 *.pdb
 *.pgc
@@ -291,6 +289,8 @@ ModelManifest.xml
 /cmake/DroneShell/Makefile
 /cmake/DroneServer/Makefile
 /cmake/AirLib/Makefile
+/cmake/AirLibUnity/Makefile
+/cmake/AirLibUnity/AirLibUnity
 /cmake/HelloDrone/HelloDrone
 /cmake/DroneShell/DroneShell
 /cmake/DroneServer/DroneServer
@@ -357,3 +357,8 @@ xcuserdata/
 !*.xcworkspace/contents.xcworkspacedata
 /*.gcno
 
+/Unity/UnityDemo/Library
+/Unity/UnityDemo/Assembly-CSharp.csproj
+/Unity/UnityDemo/UnityDemo.sln
+/Unity/UnityDemo/Logs/
+/Unity/UnityDemo/Assets/Plugins/AirsimWrapper.dll
